@@ -16,6 +16,7 @@
 package com.mydomain.teavmfirstapp;
 
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -36,50 +37,48 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 @WebServlet("/hello")
-public class Server extends HttpServlet {
-   
-	private static final long serialVersionUID = -5014505771271825585L;
-    
-    private static final String PathOfDB = "D:\\EclipseWorkSpace\\sample\\src\\main\\webappDBjson.txt";
+public class Server extends HttpServlet {  
+	private static final long serialVersionUID = -5014505771271825585L; 
     private static JSONParser parser = new JSONParser();
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, FileNotFoundException, IOException{
         try {
             Thread.sleep(500);
-        } catch (InterruptedException e) {
+        } 
+        catch (InterruptedException e) {
             return;
         }
-            
-        
-        String action = req.getHeader("action");
-        
-        
-        if (action.equals("loadData")==true) {
-        	try {       		
-				JSONObject json = (JSONObject) parser.parse(new FileReader("C:\\Programming\\workspace3\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.json"));
-				json.writeJSONString(resp.getWriter());
-        	} catch (ParseException e) {
+    String action = req.getHeader("action");
+    	if (action.equals("loadData")==true) {
+    		try {       		
+    			JSONObject json = (JSONObject) parser.parse(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/com/DBjson.json")));
+    			json.writeJSONString(resp.getWriter());
+    		}
+    		catch (ParseException e) {
 				e.printStackTrace();
-			}
-	    } else if(action.equals("saveData")==true){
-	        String JSON = req.getHeader("JSON");
-	        try {
-		        File myFile = new File("C:\\Programming\\workspace3\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.json");
-		        FileOutputStream fileStream = new FileOutputStream(myFile, false);
-		        byte[] myBytes = JSON.getBytes();
-		        fileStream.write(myBytes);
-		        fileStream.close();
-		        resp.getHeader("NAME");
-	        } catch (Exception e) {
+    		}      
+    	} 
+    	else if(action.equals("saveData")==true){
+    		String JSON = req.getHeader("JSON");
+    		try {
+    			File myFile = new File(getClass().getClassLoader().getResource("/com/DBjson.json").getPath());
+    			FileOutputStream fileStream = new FileOutputStream(myFile, false);
+    			byte[] myBytes = JSON.getBytes();
+    			fileStream.write(myBytes);
+    			fileStream.close();
+    			System.out.println("Успешно сохранено. Данные, которые сохранены - "); 
+    				try { 
+    					JSONObject json = (JSONObject) parser.parse(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/com/DBjson.json"))); 
+    					System.out.println(json.toJSONString()); 
+    				} 
+    				catch (ParseException e) { 
+		        		e.printStackTrace(); 
+    				}
+    				resp.getHeader("NAME");
+    		} 
+    		catch (Exception e) {
 				e.printStackTrace();
-			}
-	        
-	       }
-	    
-        
+    		}
+    	}
     }
-    
-
-  
 }
