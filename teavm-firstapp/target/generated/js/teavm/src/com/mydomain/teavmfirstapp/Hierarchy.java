@@ -18,7 +18,7 @@ public class Hierarchy {
 	public static Hierarchy targetObject = null;
 	public String id;
 	public Hierarchy parent;
-	public JSONArray childrenArray;
+	public JSONArray childrenArray = new JSONArray();
 	public JSONObject JSONObj = new JSONObject();
 	public ArrayList<Hierarchy> children = new ArrayList<Hierarchy>();
 	public static JSONParser parser = new JSONParser();
@@ -34,78 +34,8 @@ public class Hierarchy {
 		this.parent = parent;
 		parent.children.add(this);
 	}
+
 	
-	public static Hierarchy saveHierarchyToJSON(Hierarchy rootObj){
-		Hierarchy currentHy = null;
-		Hierarchy nextHy = null;
-		JSONObject rootJSONObj = new JSONObject();
-		Iterator<Hierarchy> nextDepthIterator = null;
-		ArrayList<Hierarchy> currentDepthArr = new ArrayList<Hierarchy>();
-		ArrayList<Hierarchy> nextDepth = new ArrayList<Hierarchy>();
-		
-		Iterator<Hierarchy> iterator = rootObj.children.iterator();
-		
-		while(iterator.hasNext()){
-			currentHy = iterator.next();
-			currentHy.JSONObj = rootJSONObj;
-			currentHy.childrenArray.clear();
-			rootJSONObj.put("id", currentHy.id);
-			rootJSONObj.put("children", currentHy.childrenArray);
-			
-			nextDepthIterator = currentHy.children.iterator();
-			while (nextDepthIterator.hasNext()){
-				nextHy = nextDepthIterator.next();
-				nextHy.childrenArray.clear();
-				nextHy.JSONObj.put("id", nextHy.id);
-				
-				currentDepthArr.add(currentHy);
-			}
-			
-			
-		}
-		
-		BFPacking(currentDepthArr,nextDepth);
-		return currentHy;
-	}
-	
-	public static void BFPacking(ArrayList<Hierarchy> currentDepthArr,
-			  					ArrayList<Hierarchy> nextDepthArr){
-		Hierarchy currentDepthHy;
-		Hierarchy nextDepthHy = null;
-		nextDepthArr = new ArrayList<Hierarchy>();
-		JSONObject currentJSONObj;
-		String id;
-		Iterator<Hierarchy> nextDepthIterator = null;
-		
-		Iterator<Hierarchy> currentDepthIterator = currentDepthArr.iterator();
-		
-		while(currentDepthIterator.hasNext()){
-			
-			currentDepthHy = currentDepthIterator.next();
-			
-			if(currentDepthHy.children!=null)
-			 nextDepthIterator = currentDepthHy.childrenArray.iterator();
-			else{
-			 currentDepthHy.JSONObj.put("children", "0");	
-			 continue;
-			 }
-			while (nextDepthIterator.hasNext()){				
-				nextDepthHy = nextDepthIterator.next();
-				nextDepthHy.JSONObj.put("id", nextDepthHy.id);
-				nextDepthHy.JSONObj.put("children", nextDepthHy.childrenArray);
-				nextDepthHy.childrenArray.clear();
-				nextDepthHy.parent.childrenArray.add(nextDepthHy.JSONObj);
-							
-				nextDepthArr.add(nextDepthHy);
-				
-			}
-			
-		}
-		
-		if (nextDepthArr.size()==0) return;
-		
-		BFParsing(nextDepthArr,currentDepthArr);		
-	}	
 /*	public static void main(String[] args) {
 		JSONObject json = null;
 		Hierarchy rootHierarchyObject;
@@ -123,11 +53,94 @@ public class Hierarchy {
 		ArrayList<Hierarchy> currentDepthArr = new ArrayList<Hierarchy>();
     	ArrayList<Hierarchy> nextDepthArr = new ArrayList<Hierarchy>();
     	
-    	findElement("1.1",rootHierarchyObject,rootHierarchyObject.children,nextDepthArr);
-    	int i = 1;
-    	findElement("1.1.1",rootHierarchyObject,rootHierarchyObject.children,nextDepthArr);
-    	int i1 = 2;
-	} */
+    	String newOnj = saveHierarchyToJSON(rootHierarchyObject);
+	} 	*/
+	
+	
+	public static String saveHierarchyToJSON(Hierarchy rootObj){
+		Hierarchy currentHy = null;
+		Hierarchy nextHy = null;
+		JSONObject rootJSONObj = new JSONObject();
+		Iterator<Hierarchy> nextDepthIterator = null;
+		ArrayList<Hierarchy> currentDepthArr = new ArrayList<Hierarchy>();
+		ArrayList<Hierarchy> nextDepth = new ArrayList<Hierarchy>();
+		
+		Iterator<Hierarchy> iterator = rootObj.children.iterator();
+		//Packing root
+		rootObj.JSONObj = new JSONObject();
+		rootObj.childrenArray.clear();
+		rootObj.JSONObj.put("root", rootObj.childrenArray);
+		
+		while(iterator.hasNext()){
+			currentHy = iterator.next();
+			currentHy.JSONObj = new JSONObject();
+			currentHy.childrenArray.clear();
+			currentHy.JSONObj.put("id", currentHy.id);
+			currentHy.JSONObj.put("children", (currentHy.children.size() != 0 ? currentHy.childrenArray:"0"));
+			
+			currentHy.parent.childrenArray.add(currentHy.JSONObj);
+			
+			nextDepthIterator = currentHy.children.iterator();
+			while (nextDepthIterator.hasNext()){
+				nextHy = nextDepthIterator.next();
+				nextHy.childrenArray.clear();
+				nextHy.JSONObj.put("id", nextHy.id);
+				nextHy.JSONObj.put("children", (nextHy.children.size() != 0 ? nextHy.childrenArray:"0"));
+				nextHy.parent.childrenArray.add(nextHy.JSONObj);
+				currentDepthArr.add(nextHy);
+			}
+			
+			
+		}
+		
+		BFPacking(currentDepthArr,nextDepth);
+		return rootObj.JSONObj.toJSONString();
+	}
+	
+	public static void BFPacking(ArrayList<Hierarchy> currentDepthArr,
+			  					ArrayList<Hierarchy> nextDepthArr){
+		Hierarchy currentDepthHy;
+		Hierarchy nextDepthHy = null;
+		nextDepthArr = new ArrayList<Hierarchy>();
+		JSONObject currentJSONObj;
+		String id;
+		Iterator<Hierarchy> nextDepthIterator1 = null;
+		
+		Iterator<Hierarchy> currentDepthIterator = currentDepthArr.iterator();
+		
+		while(currentDepthIterator.hasNext()){
+			
+			currentDepthHy = currentDepthIterator.next();
+			
+			if(currentDepthHy.children.size()!=0){
+				nextDepthIterator1 = currentDepthHy.children.iterator();
+			
+				while (nextDepthIterator1.hasNext()){	
+					
+					nextDepthHy = nextDepthIterator1.next();
+					
+					nextDepthHy.JSONObj.put("id", nextDepthHy.id);
+					
+					nextDepthHy.JSONObj.put("children", (nextDepthHy.children.size() != 0 ? nextDepthHy.childrenArray:"0"));
+					
+					nextDepthHy.childrenArray.clear();
+					nextDepthHy.parent.childrenArray.add(nextDepthHy.JSONObj);
+								
+					nextDepthArr.add(nextDepthHy);
+					
+				}}
+			else{
+			 currentDepthHy.JSONObj.put("children", "0");	
+			 continue;
+			 }
+			
+			
+		}
+		
+		if (nextDepthArr.size()==0) return;
+		
+		BFParsing(nextDepthArr,currentDepthArr);		
+	}	
 	
 	
 	///!!!!!!

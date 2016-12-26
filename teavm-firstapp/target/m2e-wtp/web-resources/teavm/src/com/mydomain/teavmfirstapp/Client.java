@@ -59,7 +59,16 @@ public final class Client {
 
     
     private static void saveToDB(){
-    	rootHierarchyObject2 = Hierarchy.saveHierarchyToJSON(rootHierarchyObject);
+    	String JSONString;
+    	JSONString = Hierarchy.saveHierarchyToJSON(rootHierarchyObject);
+    	System.out.println("JSON " + JSONString);
+        XMLHttpRequest xhr = XMLHttpRequest.create();
+        xhr.onComplete(() -> System.out.println("Good"));
+        xhr.open("GET", "hello");
+        xhr.setRequestHeader("action", "saveData");
+        xhr.setRequestHeader("JSON", JSONString);
+        xhr.send();
+    	
     	System.out.println(rootHierarchyObject2.JSONObj.toJSONString());
     }
     
@@ -169,12 +178,20 @@ public final class Client {
     	ArrayList<Hierarchy> currentDepthArr = new ArrayList<Hierarchy>();
     	ArrayList<Hierarchy> nextDepth = new ArrayList<Hierarchy>();
     	
+    	System.out.println("text " + text);
     	rootHierarchyObject = Hierarchy.loadJSONText(text);
     	
-    	HTMLElement responseElem = document.createElement("ul");
-    	responseElem.setAttribute("id","ul-"+rootHierarchyObject.id);
-
-    	responsePanel.appendChild(responseElem);
+    	if (document.getElementById("ul-"+rootHierarchyObject.id)==null){
+	    	HTMLElement responseElem = document.createElement("ul");
+	    	responseElem.setAttribute("id","ul-"+rootHierarchyObject.id);
+	
+	    	responsePanel.appendChild(responseElem);
+    	} else 
+    		document.getElementById("ul-"+rootHierarchyObject.id).delete();
+	    	HTMLElement responseElem = document.createElement("ul");
+	    	responseElem.setAttribute("id","ul-"+rootHierarchyObject.id);
+	
+	    	responsePanel.appendChild(responseElem);
     	
     	currentDepthArr = rootHierarchyObject.children;
     	

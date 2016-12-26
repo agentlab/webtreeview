@@ -15,10 +15,13 @@
  */
 package com.mydomain.teavmfirstapp;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -36,7 +40,7 @@ public class Server extends HttpServlet {
    
 	private static final long serialVersionUID = -5014505771271825585L;
     
-    private static final String PathOfDB = "C:\\Programming\\workspace2\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.txt";
+    private static final String PathOfDB = "D:\\EclipseWorkSpace\\sample\\src\\main\\webappDBjson.txt";
     private static JSONParser parser = new JSONParser();
 
     @Override
@@ -50,14 +54,29 @@ public class Server extends HttpServlet {
         
         String action = req.getHeader("action");
         
+        
         if (action.equals("loadData")==true) {
         	try {       		
-				JSONObject json = (JSONObject) parser.parse(new FileReader("C:\\Programming\\workspace2\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.json"));
+				JSONObject json = (JSONObject) parser.parse(new FileReader("C:\\Programming\\workspace3\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.json"));
 				json.writeJSONString(resp.getWriter());
         	} catch (ParseException e) {
 				e.printStackTrace();
 			}
-	    }
+	    } else if(action.equals("saveData")==true){
+	        String JSON = req.getHeader("JSON");
+	        try {
+		        File myFile = new File("C:\\Programming\\workspace3\\teavm-firstapp\\src\\main\\webapp\\WEB-INF\\DBjson.json");
+		        FileOutputStream fileStream = new FileOutputStream(myFile, false);
+		        byte[] myBytes = JSON.getBytes();
+		        fileStream.write(myBytes);
+		        fileStream.close();
+		        resp.getHeader("NAME");
+	        } catch (Exception e) {
+				e.printStackTrace();
+			}
+	        
+	       }
+	    
         
     }
     
